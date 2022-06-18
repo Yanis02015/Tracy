@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tracy/data_response.dart';
 import 'delayed_animation.dart';
 import 'signup_page.dart';
 import 'forget_page.dart';
 import 'package:tracy/user.dart';
 import 'main.dart';
+import 'package:flutter/services.dart';
 
 class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // Obtain shared preferences.
     return Scaffold(
       backgroundColor: Color(0xFF66C3EC),
       appBar: AppBar(
@@ -48,7 +51,7 @@ class LoginPage extends StatelessWidget {
                           Text(
                             "Connexion",
                             style: GoogleFonts.poppins(
-                              color: d_yellow,
+                              color: dYollow,
                               fontSize: 25,
                               fontWeight: FontWeight.w600,
                             ),
@@ -179,7 +182,24 @@ class LoginForm extends StatefulWidget {
 class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   bool _isObscure = true;
-  String email = '', password = '';
+  String email = '', password = '', code = '';
+  bool _isButtonDisabled = false;
+
+  late TextEditingController controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -191,7 +211,7 @@ class _LoginFormState extends State<LoginForm> {
             child: TextFormField(
               validator: (value) => validateEmail(value),
               decoration: InputDecoration(
-                labelText: 'votre Email',
+                labelText: 'Votre Email',
                 labelStyle: TextStyle(
                   color: Colors.blueGrey,
                 ),
@@ -242,10 +262,12 @@ class _LoginFormState extends State<LoginForm> {
                   _formKey.currentState?.save();
                   final DataRes dr =
                       await UserRestApi().loginUser(email, password);
-
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(dr.message)),
                   );
+                  if (dr.statusCode == 403) {
+                    openDialogConfirmEmail();
+                  }
                   if (dr.statusCode == 200) {
                     // TODO ROUTE TO HOME
                   }
@@ -253,7 +275,7 @@ class _LoginFormState extends State<LoginForm> {
               },
               style: ElevatedButton.styleFrom(
                 shape: StadiumBorder(),
-                primary: d_yellow,
+                primary: dYollow,
                 padding: EdgeInsets.symmetric(
                   vertical: 13,
                   horizontal: 125,
@@ -273,6 +295,51 @@ class _LoginFormState extends State<LoginForm> {
       ),
     );
   }
+
+  final confirmeMessage = 'Confirmation de l\'email nécessaire';
+  Future openDialogConfirmEmail() => showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+            title: Text(confirmeMessage),
+            content: TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                  hintText: 'Entrer le code à 6 chiffres'),
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                LengthLimitingTextInputFormatter(6)
+              ],
+              keyboardType: TextInputType.number,
+            ),
+            actions: [
+              TextButton(
+                  onPressed: _isButtonDisabled
+                      ? null
+                      : () async {
+                          setState(() {
+                            _isButtonDisabled = true;
+                          });
+                          final DataRes drSendCode =
+                              await UserRestApi().sendCodeOnEmail(email);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(drSendCode.message)));
+                          setState(() {
+                            _isButtonDisabled = false;
+                          });
+                        },
+                  child: Text(!_isButtonDisabled
+                      ? 'Renvoyé le code'
+                      : 'Envoi en cours...')),
+              TextButton(
+                  onPressed: () async {
+                    final DataRes drSendCode = await UserRestApi()
+                        .confirmeEmailUser(email, controller.text);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(drSendCode.message)));
+                  },
+                  child: const Text('Confirmer')),
+            ],
+          ));
 }
 
 String? validateEmail(String? value) {

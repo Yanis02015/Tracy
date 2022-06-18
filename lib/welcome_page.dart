@@ -5,7 +5,6 @@ import 'main.dart';
 import 'connexionpage.dart';
 
 class WelcomePage extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,28 +23,27 @@ class WelcomePage extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   height: 170,
                   child: Image.asset('images/bird.png'),
+                ),
               ),
+              DelayedAnimation(
+                delay: 2500,
+                child: Container(
+                  height: 400,
+                  margin: EdgeInsets.only(
+                    top: 20,
+                    bottom: 20,
+                  ),
+                  child: Image.asset('images/traveling.jpg'),
+                ),
               ),
-
-            DelayedAnimation(
-            delay: 2500,
-            child: Container(
-            height: 400,
-            margin: EdgeInsets.only(
-              top: 20,
-              bottom: 20,
-            ),
-             child: Image.asset('images/traveling.jpg'),
-            ),
-            ),
               DelayedAnimation(
                 delay: 3500,
                 child: Container(
                   child: Text(
-                 "Bienvenue sur TRACY , votre meilleur compagnion sur les routes de Béjaia",
-                  textAlign: TextAlign.center,
+                    "Bienvenue sur TRACY , votre meilleur compagnion sur les routes de Béjaia",
+                    textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
-                      color: d_yellow,
+                      color: dYollow,
                       fontSize: 18,
                     ),
                   ),
@@ -61,29 +59,29 @@ class WelcomePage extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      primary: d_yellow,
+                      primary: dYollow,
                       shape: StadiumBorder(),
                       padding: EdgeInsets.all(13),
                     ),
-                    child: Text("COMMENCER",
-                    style: GoogleFonts.poppins(
-                        color: Colors.black
+                    child: Text(
+                      "COMMENCER",
+                      style: GoogleFonts.poppins(color: Colors.black),
                     ),
-                    ),
-                  onPressed: (){
-                      Navigator.push(context,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
                         MaterialPageRoute(
                           builder: (context) => ChosePage(),
                         ),
                       );
-                  },),
+                    },
+                  ),
                 ),
               ),
             ],
           ),
-        )
-        ,),
+        ),
+      ),
     );
   }
 }
-

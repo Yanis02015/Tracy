@@ -46,7 +46,7 @@ class ChosePage extends StatelessWidget {
                     Text(
                       "Joinez-vous a nous",
                       style: GoogleFonts.poppins(
-                        color: d_yellow,
+                        color: dYollow,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -84,7 +84,7 @@ class ChosePage extends StatelessWidget {
                       },
                       style: ElevatedButton.styleFrom(
                         shape: StadiumBorder(),
-                        primary: d_yellow,
+                        primary: dYollow,
                         padding: EdgeInsets.all(13),
                       ),
                       child: Row(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'delayed_animation.dart';
 import 'main.dart';
+
 class PhonePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -14,17 +15,16 @@ class PhonePage extends StatelessWidget {
           icon: Icon(
             Icons.close,
             color: Colors.black,
-            size:30,
+            size: 30,
           ),
-          onPressed: (){
+          onPressed: () {
             Navigator.pop(context);
           },
         ),
       ),
       body: SingleChildScrollView(
         child: Column(
-
-          children:[
+          children: [
             Container(
               margin: EdgeInsets.symmetric(
                 vertical: 40,
@@ -38,7 +38,7 @@ class PhonePage extends StatelessWidget {
                     child: Text(
                       "Mot De Passe Oublié",
                       style: GoogleFonts.poppins(
-                        color: d_yellow,
+                        color: dYollow,
                         fontSize: 25,
                         fontWeight: FontWeight.w600,
                       ),
@@ -105,26 +105,25 @@ class _ForgotPageState extends State<ForgotPage> {
           DelayedAnimation(
             delay: 1400,
             child: ElevatedButton(
-              onPressed: (){
+              onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Processing Data')),
                   );
                 }
                 isVisible = !isVisible;
-                setState(() {
-                }
-                );
+                setState(() {});
               },
               style: ElevatedButton.styleFrom(
                 shape: StadiumBorder(),
-                primary: d_yellow,
+                primary: dYollow,
                 padding: EdgeInsets.symmetric(
                   vertical: 13,
                   horizontal: 125,
                 ),
               ),
-              child: Text("CONFIRMER",
+              child: Text(
+                "CONFIRMER",
                 style: GoogleFonts.poppins(
                   color: Colors.black,
                   fontSize: 14,
@@ -137,11 +136,12 @@ class _ForgotPageState extends State<ForgotPage> {
           DelayedAnimation(
             delay: 1600,
             child: TextButton(
-              onPressed: (){
-                Navigator.push(context,
-                MaterialPageRoute(
-                    builder: (context)=>ForgotPage(),
-                ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ForgotPage(),
+                  ),
                 );
               },
               style: TextButton.styleFrom(
@@ -149,8 +149,8 @@ class _ForgotPageState extends State<ForgotPage> {
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
-              child:
-              Text("Utiliser votre adresse email",
+              child: Text(
+                "Utiliser votre adresse email",
                 style: GoogleFonts.poppins(
                   color: Colors.black,
                   fontSize: 14,
@@ -162,7 +162,7 @@ class _ForgotPageState extends State<ForgotPage> {
           SizedBox(height: 30),
           Visibility(
             visible: isVisible,
-            child: Column (
+            child: Column(
               children: [
                 DelayedAnimation(
                   delay: 1200,
@@ -184,18 +184,18 @@ class _ForgotPageState extends State<ForgotPage> {
                 SizedBox(height: 20),
                 DelayedAnimation(
                   delay: 1200,
-                  child:
-                  ElevatedButton(
-                    onPressed: (){},
+                  child: ElevatedButton(
+                    onPressed: () {},
                     style: ElevatedButton.styleFrom(
                       shape: StadiumBorder(),
-                      primary: d_yellow,
+                      primary: dYollow,
                       padding: EdgeInsets.symmetric(
                         vertical: 13,
                         horizontal: 125,
                       ),
                     ),
-                    child: Text("CONFIRMER",
+                    child: Text(
+                      "CONFIRMER",
                       style: GoogleFonts.poppins(
                         color: Colors.black,
                         fontSize: 14,
@@ -212,6 +212,3 @@ class _ForgotPageState extends State<ForgotPage> {
     );
   }
 }
-
-
-

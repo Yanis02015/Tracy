@@ -6,8 +6,12 @@ import 'package:tracy/set_code_forget_password.dart';
 import 'package:tracy/user.dart';
 import 'delayed_animation.dart';
 import 'main.dart';
+import 'package:flutter/services.dart';
 
-class PasswordPage extends StatelessWidget {
+class CodeResetPage extends StatelessWidget {
+  const CodeResetPage({super.key, required this.email});
+  final String email;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,7 +56,7 @@ class PasswordPage extends StatelessWidget {
                   DelayedAnimation(
                     delay: 1100,
                     child: Text(
-                      "Veuilliez introduire votre adresse email afin de recupérer votre compte",
+                      "Veuilliez introduire le code reçu à votre email",
                       style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -60,7 +64,7 @@ class PasswordPage extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 20),
-                  ForgotPage(),
+                  CodeForgotPage(email),
                 ],
               ),
             ),
@@ -71,18 +75,38 @@ class PasswordPage extends StatelessWidget {
   }
 }
 
-class ForgotPage extends StatefulWidget {
-  const ForgotPage({super.key});
+class CodeForgotPage extends StatefulWidget {
+  CodeForgotPage(this.email);
+  final String email;
 
   @override
-  State<ForgotPage> createState() => _ForgotPageState();
+  State<CodeForgotPage> createState() => _CodeForgotPageState(email);
 }
 
-class _ForgotPageState extends State<ForgotPage> {
-  String email = '';
+class _CodeForgotPageState extends State<CodeForgotPage> {
+  _CodeForgotPageState(this.email);
+  String email;
+  bool _isButtonDisabled = false;
+
+  late TextEditingController controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final formKey = GlobalKey<FormState>();
+    String code = '';
 
     return Column(
       children: [
@@ -93,17 +117,16 @@ class _ForgotPageState extends State<ForgotPage> {
               DelayedAnimation(
                 delay: 1200,
                 child: TextFormField(
-                  validator: (value) => validateEmail(value),
+                  decoration: const InputDecoration(
+                      hintText: 'Entrer le code à 6 chiffres'),
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                    LengthLimitingTextInputFormatter(6),
+                  ],
+                  keyboardType: TextInputType.number,
                   onSaved: (value) {
-                    email = value.toString();
+                    code = value.toString();
                   },
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: 'votre Email',
-                    labelStyle: TextStyle(
-                      color: Colors.blueGrey,
-                    ),
-                  ),
                 ),
               ),
               SizedBox(height: 40),
@@ -113,18 +136,14 @@ class _ForgotPageState extends State<ForgotPage> {
                   onPressed: () async {
                     if (formKey.currentState!.validate()) {
                       formKey.currentState!.save();
-                      final DataRes dr = await UserRestApi()
-                          .sendEmailCodeForgetPassword(email);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(dr.message)),
-                      );
+                          const SnackBar(content: Text('Processing Data')));
+                      final DataRes dr = await UserRestApi()
+                          .confirmeCodeForgetPassword(email, code);
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(dr.message)));
                       if (dr.statusCode == 200) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => CodeResetPage(email: email),
-                          ),
-                        );
+                        openDialogSetNewPassword(code);
                       }
                     }
                   },
@@ -152,6 +171,50 @@ class _ForgotPageState extends State<ForgotPage> {
         ),
       ],
     );
+  }
+
+  final confirmeMessage = 'Nouveau mot de passe';
+  Future openDialogSetNewPassword(String code) {
+    final formKey = GlobalKey<FormState>();
+
+    return showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text(confirmeMessage),
+              content: Form(
+                key: formKey,
+                child: TextFormField(
+                  controller: controller,
+                  validator: (value) {
+                    if (value == null || value.isEmpty || value.length < 6) {
+                      return 'Le mot de passe doit etre long';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    labelStyle: TextStyle(
+                      color: Colors.blueGrey,
+                    ),
+                    labelText: "Mot de passe",
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                    onPressed: () async {
+                      if (formKey.currentState!.validate()) {
+                        formKey.currentState!.save();
+                        print(controller.text);
+                        print(code);
+                      }
+                      final DataRes drSendCode = await UserRestApi()
+                          .resetForgetPassword(email, code, controller.text);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(drSendCode.message)));
+                    },
+                    child: const Text('Confirmer')),
+              ],
+            ));
   }
 }
 

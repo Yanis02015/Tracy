@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tracy/data_response.dart';
 import 'delayed_animation.dart';
 import 'main.dart';
+import 'login_page.dart';
 import 'package:tracy/user.dart';
 
 class SignupPage extends StatelessWidget {
@@ -46,7 +47,7 @@ class SignupPage extends StatelessWidget {
                           Text(
                             "Inscription",
                             style: GoogleFonts.poppins(
-                              color: d_yellow,
+                              color: dYollow,
                               fontSize: 25,
                               fontWeight: FontWeight.w600,
                             ),
@@ -209,14 +210,23 @@ class _SignFormState extends State<SignForm> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(dr.message)),
                   );
-                  if (dr.statusCode == 201) {
-                    // TODO compte crée
+                  if (dr.statusCode != 201) {
+                    return;
                   }
+                  Future.delayed(Duration.zero).then((_) {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LoginPage(),
+                      ),
+                    );
+                  });
                 }
               },
               style: ElevatedButton.styleFrom(
                 shape: StadiumBorder(),
-                primary: d_yellow,
+                primary: dYollow,
                 padding: EdgeInsets.symmetric(
                   vertical: 13,
                   horizontal: 125,

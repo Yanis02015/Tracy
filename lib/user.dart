@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tracy/data_response.dart';
 
 class User extends Equatable {
@@ -25,7 +26,7 @@ class User extends Equatable {
 
 class UserRestApi {
   final _api = Dio(BaseOptions(
-    baseUrl: 'http://localhost:8081/api/auth/',
+    baseUrl: 'http://192.168.1.8:8081/api/auth/',
     followRedirects: false,
     validateStatus: (status) {
       return status! < 500;
@@ -43,8 +44,10 @@ class UserRestApi {
       'email': user.email,
       'password': user.password,
     });
-    String message = res.statusCode! > 201
-        ? 'Erreur inattendue'
+    final message = res.statusCode != 201
+        ? (res.data['message'] != null)
+            ? res.data['message']
+            : 'Erreur inattendue'
         : 'Inscription effectué avec succès';
     return DataRes(res.statusCode!, message);
   }
@@ -52,9 +55,41 @@ class UserRestApi {
   Future<DataRes> loginUser(String email, String password) async {
     final res =
         await _api.post('login', data: {'email': email, 'password': password});
-    if (res.statusCode == 200) {
-      return DataRes(res.statusCode!, res.data['message']);
-    }
-    return DataRes(res.statusCode!, res.data['error']);
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', '${res.data['token']}');
+    final String? token = prefs.getString('token');
+    print(token);
+    return DataRes(res.statusCode!, res.data['message']);
+  }
+
+  Future<DataRes> sendCodeOnEmail(String email) async {
+    final res = await _api.post('send-code', data: {'email': email});
+    return DataRes(res.statusCode!, res.data['message']);
+  }
+
+  Future<DataRes> confirmeEmailUser(String email, String code) async {
+    final res =
+        await _api.post('confirme-code', data: {'email': email, 'code': code});
+    return DataRes(res.statusCode!, res.data['message']);
+  }
+
+  Future<DataRes> sendEmailCodeForgetPassword(String email) async {
+    final res = await _api
+        .post('send-email-code-forget-password', data: {'email': email});
+    return DataRes(res.statusCode!, res.data['message']);
+  }
+
+  Future<DataRes> confirmeCodeForgetPassword(String email, String code) async {
+    final res = await _api.post('confirme-code-reset-password',
+        data: {'email': email, 'code': code});
+    return DataRes(res.statusCode!, res.data['message']);
+  }
+
+  Future<DataRes> resetForgetPassword(
+      String email, String code, String password) async {
+    final res = await _api.post('reset-forget-password',
+        data: {'email': email, 'code': code, 'password': password});
+    return DataRes(res.statusCode!, res.data['message']);
   }
 }
